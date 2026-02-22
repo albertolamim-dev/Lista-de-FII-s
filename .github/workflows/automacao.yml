@@ -1,43 +1,35 @@
-name: Robô Extrator de FIIs
+name: Extrator de FIIs
 
-# Quando este robô vai rodar?
 on:
   schedule:
-    # Roda toda sexta-feira (5) às 22:00 UTC (19:00 no horário de Brasília)
-    - cron: '0 22 * * 5'
-  
-  # Permite que você clique em um botão no GitHub para rodar manualmente a qualquer hora
-  workflow_dispatch: 
+    - cron: '0 22 * * 5'  # Toda sexta-feira às 22:00 UTC
+  workflow_dispatch:  # Permite execução manual
 
 jobs:
-  extrair_dados:
+  extrair:
     runs-on: ubuntu-latest
 
-    # Permissão necessária para o robô salvar o arquivo de volta no seu repositório
-    permissions:
-      contents: write
-
     steps:
-    - name: Baixar o código do repositório
-      uses: actions/checkout@v4
+    - name: Checkout repository
+      uses: actions/checkout@v3
 
-    - name: Configurar o Python
+    - name: Set up Python
       uses: actions/setup-python@v4
       with:
         python-version: '3.10'
 
-    - name: Instalar as bibliotecas (yfinance, pandas, openpyxl)
+    - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install -r requirements.txt
+        pip install yfinance pandas openpyxl
 
-    - name: Rodar o script de extração
+    - name: Run extrator script
       run: python extrator_fiis.py
 
-    - name: Salvar a planilha gerada no repositório
+    - name: Commit and push changes
       run: |
-        git config --local user.email "github-actions[bot]@users.noreply.github.com"
-        git config --local user.name "GitHub Actions Bot"
-        git add relatorios/*.xlsx
-        git commit -m "🤖 Relatório de FIIs atualizado automaticamente" || echo "Nenhuma alteração para commitar"
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add relatorios/
+        git commit -m "Atualização automática do relatório de FIIs" || echo "No changes to commit"
         git push
